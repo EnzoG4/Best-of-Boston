@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Best of Boston</title>
+	<link rel="stylesheet" type="text/css" href="css/base.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.6/cosmo/bootstrap.min.css">
+	<link rel="stylesheet" style = "text/css" href="css/hw13.css">
+	<script type = "text/javascript" src = "js/hw13.js"></script>
+  </head>
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript">
+   		function toggle(source) {
+  			checkboxes = document.getElementsByName('checkbox');
+  			testbox = document.getElementById('testbox');
+  			if (testbox.checked){
+  				testbox.checked = false;
+  				for (var i = 0, n=checkboxes.length;i<n;i++){
+  					checkboxes[i].checked = false;
+  				}
+  			}
+  			else{
+  				testbox.checked = true;
+  				for(var i=0, n=checkboxes.length;i<n;i++) {
+    				checkboxes[i].checked = true;
+    			}
+ 		 	}
+
+		}
+		$(document).ready(function(){
+			$.getJSON( "php/dbconnect.php" , function(data) {
+				$.each(data, function(i, bob){
+					$("#results").append("<tr><td>" + bob.name + "</td><td>" + bob.entered_by + "</td><td>"+ bob.category + "</td><td>" + bob.stars + "</td><td>" + bob.price_range + "</td><td>" + bob.phone + "<br>" + bob.address + "</td><td>" + bob.url + "<br>" + bob.comment+ "</td><td><form method = 'post' action = 'php/dbconnect.php'><input type = 'hidden' name = 'attraction' id = 'attraction' value = '  " + bob.attraction_id + " '/><button type = 'submit' class = 'btn-micro btn-danger' id = 'hide' name = 'hide'> <small><span class = 'glyphicon glyphicon-remove' aria-hidden = 'true'></span></small></button></form></td></tr>");
+				});
+			$("#results").append("</table>");
+			})
+			.fail(function() {
+					console.log( "getJSON error" );
+			});
+			document.getElementById("form").className = "js";
+			$(document).ready(function(){
+				$("#add").click(function(){
+					if($("#form").is(":visible")){
+						$("#form").hide();
+					}
+					else{
+						$("#form").show();
+					}
+					return false;
+				});
+			});
+			$(':checkbox').click(function(){
+				if (this.checked){
+					window.alert("hello");
+				}
+			});
+			$("#select-all").click(function(event){
+				if(this.checked) {
+					$(':checkbox'.each(function(){
+						this.checked = true;
+					})
+				);
+			}
+
+			});
+			$("#displaytable").click(function() {
+    			location.reload();
+			});
+			$("#search1").click(function(){
+				var results = document.getElementById('results');
+				var userSearch = document.getElementById('userSearch').value;
+				var xhttp = new XMLHttpRequest();
+				results.innerHTML = "<table id='results' class = 'table table-hover table-striped'> <tr class = 'panel-heading'><th width = '10%'>Name</th><th width = '10%'>Submitted By</th><th width = '8%'>Category</th><th width = '5%'>Rating</th><th width = '5%'>Price Range</th><th width = '10%'>Phone/Address</th><th width = '20%'>URL/Comment</th><th width = '5%'>Hide</th></tr></table>";
+				if (userSearch == "") {
+		    		$("#results").append("<tr><td>Nothing Searched.</td></tr></table>");
+		  		}
+		  		else{
+		  			$.ajax({
+						type: 'GET',
+						url: 'php/dbconnect2.php',
+						data: {search: userSearch},
+						success: function(data){
+							var jsonObj = JSON.parse(data);	
+							$.each(jsonObj, function(i, bob){
+								$("#results").append("<tr><td>" + jsonObj[i].name + "</td><td>" + jsonObj[i].entered_by + "</td><td>" + jsonObj[i].category + "</td><td>" + jsonObj[i].stars + "</td><td>" + jsonObj[i].price_range + "</td><td>" + jsonObj[i].phone + "<br>" + jsonObj[i].address + "</td><td>" + jsonObj[i].url + "<br>" + jsonObj[i].comment + "</td><td><form method = 'post' action = 'php/dbconnect2.php'><input type = 'hidden' name = 'attraction' id = 'attraction' value = '  " + jsonObj[i].attraction_id + " '/><button type = 'submit' class = 'btn-micro btn-danger' id = 'hide' name = 'hide'> <small><span class = 'glyphicon glyphicon-remove' aria-hidden = 'true'></span></small></button></form></td></tr>");
+							})	
+							$("#results").append("</table>");
+						}
+					})
+					}
+				return false;
+			});
+		});
+    </script>
+  <body>
+  	<div class = "container">
+  		<div class = 'page-header'>
+		  	<h1 align = "center">Best of Boston!</h1><br>
+		  	<small align = "center">By Lorenzo Guevara</small>
+		</div>
+	</div>
+  	<br>
+	  	<div class = 'col-xs-4'>
+	  		<div class = 'panel panel-default box-shadow--6dp'>
+	  			<div class = 'panel-body'>
+	  				<form id = 'search' method = 'get'>
+	  					<fieldset>
+	  						<legend> Search </legend>
+	  						<label> Enter Query </label><br>
+	  						<input type = 'text' name = 'searchbar' class = 'form-control' placeholder = 'Search...' id = 'userSearch'><br>
+	  						<button class = 'btn btn-info' name = 'search' id = 'search1'>Search <span class = 'glyphicon glyphicon-search' aria-hidden = 'true'></span></button>
+	  					</fieldset>
+	  				</form>
+  				</div>
+  			</div>
+  			<div class = 'panel panel-default box-shadow--6dp'>
+  				<div class = 'panel-body'>
+  					<fieldset>
+  					<legend> Select </legend>
+  					<label> Filter Results </label><br>
+  						<form action = 'php/dumpcookie.php'>
+	  						<button type = 'submit' class = 'btn btn-success' style="background-color:#5bc0de;border:#5bc0de" id = 'select-all'>Show All <span class = 'glyphicon glyphicon-filter' aria-hidden = 'true'></span></button><br>
+	  					</form>
+	  				</fieldset>
+	  			</div>
+	  		</div>
+				<div class = "panel panel-default box-shadow--6dp">
+					<div class = "panel-body">
+						<fieldset>
+							<legend> Features </legend>
+							<button id="displaytable" class="btn btn-primary" >Refresh Table <span class = 'glyphicon glyphicon-repeat' aria-hidden = 'true'></span></button>
+							<button id = "add" class = "btn btn-success">Add Attraction  <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span></button>
+						</fieldset>
+						<br>
+							<form id ='form' method = 'post' action = 'php/formHandler.php'>
+								<fieldset>
+									<legend> Add an attracton </legend>
+									<label> Name of Attraction: </label> <br>
+									<input type = "text" name = "name" class='form-control' placeholder="Name of establishment" onblur = "nameValidation()" id = "name">
+									<small class="text-muted text-danger" id = "nameError"></small><br>
+									<label> Category: </label><br>
+									<input type = "text" name = "category" class='form-control' placeholder="Category" id = 'category' onblur = 'categoryValidation()'>
+									<small class="text-muted text-danger" id = "categoryError"></small><br>
+									<label> Rating: </label><br>
+									<select name = 'rating' class='form-control input-sm'>
+										<option selected = 'selected' value = '*'>How'd you rate this place?</option>
+										<option value = '*'> 1 star </option>
+										<option value = '**'> 2 star </option>
+										<option value = '***'> 3 star </option>
+										<option value = '****'> 4 star </option>
+										<option value = '*****'> 5 star </option>
+									</select><br>
+									<label> Price </label><br>
+									<select name = 'price' class='form-control input-sm'>
+										<option value = '$' selected = 'selected'> Price range? </option>
+										<option value = '$'> $ </option>
+										<option value = '$$'> $$ </option>
+										<option value = '$$$'> $$$ </option>
+										<option value = '$$$$'> $$$$ </option>
+										<option value = '$$$$$'> $$$$$ </option>
+									</select><br>
+									<label> Entered By: </label><br>
+									<input type = 'text' name ='enter' class='form-control' placeholder="Your name" id = 'enter' onblur = 'enterValidation()'>
+									<small class="text-muted text-danger" id = "enterError"></small><br>
+									<label> URL: </label><br>
+									<input type = 'text' name = 'url' class='form-control' placeholder="Copy website url" onblur = 'urlValidation()' id ="url">
+									<small class="text-muted text-danger" id = "urlError"></small><br>
+									<label> Phone: </label><br>
+									<input type = 'text' name = 'phone' class='form-control' placeholder="XXX-XXX-XXXX" id = 'phone' onblur = 'phoneValidation()' maxlength = "16">
+									<small class="text-muted text-danger" id = "phoneError"></small><br>
+									<label> Address: </label><br>
+									<input type = 'text' name = 'address' onblur = "addressValidation()" class='form-control' placeholder="Enter the address." id = 'address'>
+									<small class="text-muted text-danger" id = "addressError"></small><br>
+									<label> Comments: </label><br>
+									<textarea rows = "4" cols = "50" name = 'comment' placeholder="Enter a comment..." class="form-control" onblur = "commentValidation()" id = "comment"></textarea>
+									<small class="text-muted text-danger" id = "commentError"></small><br>
+									<button type = 'reset' class = 'btn btn-danger'> Reset <span class = 'glyphicon glyphicon-remove' aria-hidden = 'true'></span></button>
+									<button type = 'submit' class = 'btn btn-success'>Submit <span class = 'glyphicon glyphicon-ok' aria-hidden= 'true'></span></button><br><br>
+								</fieldset>
+						</form>
+				</div>
+			</div>
+		</div>
+  		<div class = 'col-xs-8'>
+  			<div class = "panel panel-default box-shadow--6dp">
+			  	<table id="results" class = "table table-hover table-striped">
+			  		<tr class = "panel-heading">
+			  			<th width = '10%'>Name</th>
+			  			<th width = '10%'>Submitted By</th>
+			  			<th width = '8%'>Category</th>
+			  			<th width = '5%'>Rating</th>
+			  			<th width = '5%'>Price Range</th>
+			  			<th width = '10%'>Phone/Address</th>
+			  			<th width = '20%'>URL/Comment</th>
+			  			<th width = '5%'>Hide</th>
+			  		</tr>
+			  	</table>
+			<div>
+		<div>
+
+  </body>
+</html>
